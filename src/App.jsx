@@ -1,121 +1,94 @@
-import { useState } from 'react'
-import heroImg from './assets/hero.png'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import './App.css'
+import { useEffect, useState } from 'react'
+import Casilla from './components/Casilla.jsx'
+
+const FILAS = 6
+const COLUMNAS = 5
+const SOLUCION = 'PERRO'
+
+// Crea un tablero vacío: 6 filas de 5 letras en blanco
+function tableroVacio() {
+  const tablero = []
+  for (let f = 0; f < FILAS; f++) {
+    tablero.push(Array(COLUMNAS).fill(''))
+  }
+  return tablero
+}
+
+// Decide el color de una letra ya comprobada
+function estadoDe(letra, columna) {
+  if (SOLUCION[columna] === letra) return 'correcta'
+  if (SOLUCION.includes(letra)) return 'presente'
+  return 'ausente'
+}
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [intentos, setIntentos] = useState(tableroVacio())
+  const [filaActual, setFilaActual] = useState(0)
+
+  // El último intento comprobado, como texto: 'PERRO'
+  const ultimo = filaActual > 0 ? intentos[filaActual - 1].join('') : ''
+  const ganada = ultimo === SOLUCION
+  const terminada = ganada || filaActual === FILAS
+
+  useEffect(() => {
+    // Lleva el cursor a la primera casilla en la que se puede escribir
+    document.querySelector('.casilla:enabled')?.focus()
+  }, [filaActual])
+
+  function cambiarLetra(f, c, evento) {
+    const letra = evento.target.value.toUpperCase()
+    // Solo aceptamos una letra, o nada si se ha borrado
+    if (!/^[A-ZÑ]?$/.test(letra)) return
+
+    // Copiamos el tablero, cambiamos la copia y la guardamos
+    const copia = intentos.map((fila) => [...fila])
+    copia[f][c] = letra
+    setIntentos(copia)
+
+    // Después de escribir una letra, pasamos a la casilla siguiente
+    if (letra !== '') evento.target.nextElementSibling?.focus()
+  }
+
+  function comprobar(evento) {
+    // Evita que el navegador recargue la página al enviar el formulario
+    evento.preventDefault()
+    if (terminada) return
+    // No se puede comprobar una fila incompleta
+    if (intentos[filaActual].includes('')) return
+
+    setFilaActual(filaActual + 1)
+  }
 
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.jsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
+    <form className="juego" onSubmit={comprobar}>
+      <h1>Wordle</h1>
+      <div className="tablero">
+        {intentos.map((fila, f) => (
+          <div className="fila" key={f}>
+            {fila.map((letra, c) => (
+              <Casilla
+                key={c}
+                letra={letra}
+                estado={f < filaActual ? estadoDe(letra, c) : ''}
+                activa={f === filaActual && !terminada}
+                onCambio={(evento) => cambiarLetra(f, c, evento)}
+              />
+            ))}
+          </div>
+        ))}
+      </div>
+      {terminada ? (
+        <p className="mensaje" role="status">
+          {ganada
+            ? '¡Enhorabuena, has acertado!'
+            : `La palabra era ${SOLUCION}`}
+        </p>
+      ) : (
+        <button className="boton" type="submit">
+          Comprobar
         </button>
-      </section>
-
-      <div className="ticks"></div>
-
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
-
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
+      )}
+    </form>
   )
 }
 
