@@ -14,8 +14,43 @@ function tableroVacio() {
   return tablero
 }
 
-// Decide el color de una letra ya comprobada
-function estadoDe(letra, columna, solucion) {
+// Calcula los colores de la fila completa en dos pasadas
+function calcularEstadosFila(fila, solucion) {
+  const estados = Array(COLUMNAS).fill('')
+  const frecuencias = {}
+
+  for (const letra of solucion) {
+    frecuencias[letra] = (frecuencias[letra] || 0) + 1
+  }
+
+  // Primera pasada: letras que están en su sitio
+  for (let c = 0; c < COLUMNAS; c++) {
+    if (fila[c] === solucion[c]) {
+      estados[c] = 'correcta'
+      frecuencias[fila[c]]--
+    }
+  }
+
+  // Segunda pasada: letras restantes (presentes o ausentes)
+  for (let c = 0; c < COLUMNAS; c++) {
+    if (estados[c] === 'correcta') continue
+    const letra = fila[c]
+    if (frecuencias[letra] > 0) {
+      estados[c] = 'presente'
+      frecuencias[letra]--
+    } else {
+      estados[c] = 'ausente'
+    }
+  }
+
+  return estados
+}
+
+// Decide el color de una letra individual (útil para pruebas unitarias)
+function estadoDe(letra, columna, solucion, fila = null) {
+  if (fila) {
+    return calcularEstadosFila(fila, solucion)[columna]
+  }
   if (solucion[columna] === letra) return 'correcta'
   if (solucion.includes(letra)) return 'presente'
   return 'ausente'
@@ -90,7 +125,7 @@ function App() {
               <Casilla
                 key={c}
                 letra={letra}
-                estado={f < filaActual ? estadoDe(letra, c, solucion) : ''}
+                estado={f < filaActual ? estadoDe(letra, c, solucion, fila) : ''}
                 activa={f === filaActual && !terminada}
                 onCambio={(evento) => cambiarLetra(f, c, evento)}
                 onTecla={manejarTecla}
