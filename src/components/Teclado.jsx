@@ -1,24 +1,30 @@
-const FILAS_TECLADO = [
-  ['Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P'],
-  ['A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L', 'Ñ'],
-  ['ENVIAR', 'Z', 'X', 'C', 'V', 'B', 'N', 'M', 'BORRAR'],
-]
+const FILAS_TECLADO = ['QWERTYUIOP', 'ASDFGHJKLÑ', 'ZXCVBNM']
 
-function Teclado({ estadosLetras = {}, onPulsar }) {
+function Teclado({ estados = {}, onLetra, onBorrar }) {
   return (
-    <div className="teclado" aria-label="Teclado virtual">
-      {FILAS_TECLADO.map((fila, f) => (
-        <div className="teclado-fila" key={f}>
-          {fila.map((tecla) => (
+    <div className="teclado" aria-label="Teclado en pantalla">
+      {FILAS_TECLADO.map((fila) => (
+        <div className="fila-teclado" key={fila}>
+          {[...fila].map((letra) => (
             <button
-              key={tecla}
+              key={letra}
               type="button"
-              className={`tecla ${estadosLetras[tecla] || ''}`}
-              onClick={() => onPulsar(tecla)}
+              className={`tecla ${estados[letra] || ''}`}
+              onClick={() => onLetra(letra)}
             >
-              {tecla}
+              {letra}
             </button>
           ))}
+          {fila === 'ZXCVBNM' && (
+            <button
+              type="button"
+              className="tecla tecla-ancha"
+              aria-label="Borrar letra"
+              onClick={onBorrar}
+            >
+              ⌫
+            </button>
+          )}
         </div>
       ))}
     </div>

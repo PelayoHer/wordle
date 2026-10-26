@@ -1,30 +1,38 @@
 import { describe, expect, test } from 'vitest'
 import {
-  calcularEstadosFila,
-  calcularEstadosLetras,
+  COLUMNAS,
+  FILAS,
+  PALABRAS,
   estadoDe,
+  estadosDeFila,
+  estadosDelTeclado,
+  palabraAlAzar,
   tableroVacio,
 } from './juego.js'
 
-describe('estadoDe', () => {
-  test('letra en su sitio', () => {
+describe('estadoDe (comprobación unitaria de letra)', () => {
+  test('letra en su sitio devuelve correcta', () => {
     expect(estadoDe('P', 0, 'PERRO')).toBe('correcta')
   })
 
-  test('letra en otra posición', () => {
+  test('letra en otra posición devuelve presente', () => {
     expect(estadoDe('O', 0, 'PERRO')).toBe('presente')
   })
 
-  test('letra que no está en la solución', () => {
-    expect(estadoDe('X', 0, 'PERRO')).toBe('ausente')
+  test('letra que no está en la solución devuelve ausente', () => {
+    expect(estadoDe('Z', 0, 'PERRO')).toBe('ausente')
   })
 })
 
-describe('calcularEstadosFila con letras repetidas (algoritmo en dos pasadas)', () => {
-  test('intento RRRRR frente a PERRO marca en gris la primera, segunda y última erre', () => {
-    const intento = ['R', 'R', 'R', 'R', 'R']
-    const estados = calcularEstadosFila(intento, 'PERRO')
-    expect(estados).toEqual([
+describe('estadosDeFila (algoritmo en dos pasadas con repetidas)', () => {
+  test('fila completamente acertada devuelve todas correctas', () => {
+    expect(estadosDeFila([...'PERRO'], 'PERRO')).toEqual(
+      Array(5).fill('correcta'),
+    )
+  })
+
+  test('intento RRRRR con PERRO deja en gris la primera, segunda y última erre', () => {
+    expect(estadosDeFila([...'RRRRR'], 'PERRO')).toEqual([
       'ausente',
       'ausente',
       'correcta',
@@ -33,53 +41,51 @@ describe('calcularEstadosFila con letras repetidas (algoritmo en dos pasadas)', 
     ])
   })
 
-  test('palabra con acierto total', () => {
-    const intento = ['P', 'E', 'R', 'R', 'O']
-    const estados = calcularEstadosFila(intento, 'PERRO')
-    expect(estados).toEqual([
-      'correcta',
-      'correcta',
-      'correcta',
-      'correcta',
-      'correcta',
-    ])
-  })
-
-  test('palabra con letras desordenadas y no repetidas de más', () => {
-    const intento = ['O', 'R', 'E', 'J', 'A']
-    const estados = calcularEstadosFila(intento, 'PERRO')
-    expect(estados).toEqual([
+  test('letra repetida en otra posición: OOXXX con PERRO', () => {
+    expect(estadosDeFila([...'OOXXX'], 'PERRO')).toEqual([
       'presente',
-      'presente',
-      'presente',
+      'ausente',
+      'ausente',
       'ausente',
       'ausente',
     ])
   })
-})
 
-describe('calcularEstadosLetras para el teclado', () => {
-  test('acumula estados priorizando correcta sobre presente', () => {
-    const intentos = [
-      ['R', 'O', 'T', 'O', 'R'],
-      ['P', 'E', 'R', 'R', 'O'],
-    ]
-    const estadosLetras = calcularEstadosLetras(intentos, 2, 'PERRO')
-    expect(estadosLetras['P']).toBe('correcta')
-    expect(estadosLetras['E']).toBe('correcta')
-    expect(estadosLetras['R']).toBe('correcta')
-    expect(estadosLetras['O']).toBe('correcta')
-    expect(estadosLetras['T']).toBe('ausente')
+  test('intento mixto sin repeticiones extra', () => {
+    expect(estadosDeFila([...'PLATO'], 'PERRO')).toEqual([
+      'correcta',
+      'ausente',
+      'ausente',
+      'ausente',
+      'correcta',
+    ])
   })
 })
 
-describe('tableroVacio', () => {
-  test('inicializa 6 filas de 5 cadenas vacías', () => {
+describe('estadosDelTeclado (prioridades de color para teclas)', () => {
+  test('el teclado conserva el mejor estado alcanzado de cada letra', () => {
+    const intentos = [[...'RRRRR'], [...'PLATO']]
+    const teclado = estadosDelTeclado(intentos, 2, 'PERRO')
+
+    expect(teclado.R).toBe('correcta')
+    expect(teclado.P).toBe('correcta')
+    expect(teclado.O).toBe('correcta')
+    expect(teclado.L).toBe('ausente')
+    expect(teclado.A).toBe('ausente')
+    expect(teclado.T).toBe('ausente')
+  })
+})
+
+describe('tableroVacio y palabraAlAzar', () => {
+  test('el tablero vacío tiene las dimensiones correctas de 6x5', () => {
     const tablero = tableroVacio()
-    expect(tablero).toHaveLength(6)
-    tablero.forEach((fila) => {
-      expect(fila).toHaveLength(5)
-      expect(fila.every((celda) => celda === '')).toBe(true)
-    })
+    expect(tablero).toHaveLength(FILAS)
+    expect(tablero.every((fila) => fila.length === COLUMNAS && fila.every((c) => c === ''))).toBe(true)
+  })
+
+  test('la palabra al azar pertenece a la lista y es distinta de la anterior', () => {
+    const palabra = palabraAlAzar('PERRO')
+    expect(PALABRAS).toContain(palabra)
+    expect(palabra).not.toBe('PERRO')
   })
 })

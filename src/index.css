@@ -36,25 +36,35 @@ body {
   text-transform: uppercase;
 }
 
+/* Indicadores de accesibilidad visual (símbolos en esquina y bordes diferenciados) */
+.casilla.correcta,
+.casilla.presente,
+.casilla.ausente {
+  background-repeat: no-repeat;
+  background-position: right 4px top 4px;
+  background-size: 13px;
+}
+
 .casilla.correcta {
-  background: #2e7d32;
-  border: 3px solid #1b5e20;
-  border-radius: 6px;
+  background-color: #2e7d32;
+  border: 4px double #ffffff;
+  outline: 2px solid #2e7d32;
   color: #ffffff;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M2 6l3 3 5-6' fill='none' stroke='white' stroke-width='2'/%3E%3C/svg%3E");
 }
 
 .casilla.presente {
-  background: #f2c94c;
-  border: 3px dashed #9a6700;
-  border-radius: 2px;
+  background-color: #f2c94c;
+  border: 3px dashed #1a1a1b;
   color: #1a1a1b;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M1 4h10M8 1l3 3-3 3M11 8H1M4 5L1 8l3 3' fill='none' stroke='black' stroke-width='1.5'/%3E%3C/svg%3E");
 }
 
 .casilla.ausente {
-  background: #5f6368;
-  border: 3px dotted #3c4043;
-  border-radius: 0;
+  background-color: #5f6368;
+  border: 2px solid #5f6368;
   color: #ffffff;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M2 2l8 8M10 2l-8 8' fill='none' stroke='white' stroke-width='2'/%3E%3C/svg%3E");
 }
 
 .tablero {
@@ -64,13 +74,13 @@ body {
 }
 
 .casilla:disabled {
-  /* Algunos navegadores atenúan los campos desactivados */
   opacity: 1;
   -webkit-text-fill-color: currentColor;
 }
 
 .casilla:focus-visible,
-.boton:focus-visible {
+.boton:focus-visible,
+.tecla:focus-visible {
   outline: 3px solid #1a73e8;
   outline-offset: 2px;
 }
@@ -89,44 +99,50 @@ body {
 .aviso {
   min-height: 24px;
   margin: 12px 0;
-  color: #d32f2f;
+  color: #b3261e;
   font-weight: bold;
 }
 
+.mensaje {
+  font-size: 1.15rem;
+  font-weight: bold;
+  margin: 12px 0;
+}
+
+/* Teclado en pantalla */
 .teclado {
-  display: flex;
-  flex-direction: column;
+  display: grid;
   gap: 6px;
   margin-top: 24px;
   user-select: none;
 }
 
-.teclado-fila {
+.fila-teclado {
   display: flex;
   justify-content: center;
-  gap: 5px;
+  gap: 4px;
 }
 
 .tecla {
-  min-width: 32px;
-  height: 48px;
-  padding: 0 8px;
+  flex: 1;
+  max-width: 42px;
+  height: 52px;
+  padding: 0;
   border: none;
   border-radius: 4px;
   background: #d3d6da;
   color: #1a1a1b;
   font: inherit;
-  font-size: 0.9rem;
   font-weight: bold;
   cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  text-transform: uppercase;
+}
+
+.tecla.tecla-ancha {
+  max-width: 64px;
 }
 
 .tecla:hover {
-  background: #bbbfc4;
+  opacity: 0.9;
 }
 
 .tecla.correcta {
@@ -143,5 +159,3 @@ body {
   background: #5f6368;
   color: #ffffff;
 }
-
-
