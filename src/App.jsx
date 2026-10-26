@@ -53,6 +53,12 @@ function App() {
     if (letra !== '') evento.target.nextElementSibling?.focus()
   }
 
+  function manejarTecla(evento) {
+    if (evento.key === 'Backspace' && evento.target.value === '') {
+      evento.target.previousElementSibling?.focus()
+    }
+  }
+
   function comprobar(evento) {
     // Evita que el navegador recargue la página al enviar el formulario
     evento.preventDefault()
@@ -87,6 +93,7 @@ function App() {
                 estado={f < filaActual ? estadoDe(letra, c, solucion) : ''}
                 activa={f === filaActual && !terminada}
                 onCambio={(evento) => cambiarLetra(f, c, evento)}
+                onTecla={manejarTecla}
               />
             ))}
           </div>
