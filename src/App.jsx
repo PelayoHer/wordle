@@ -59,6 +59,11 @@ function App() {
     setFilaActual(filaActual + 1)
   }
 
+  function nuevaPartida() {
+    setIntentos(tableroVacio())
+    setFilaActual(0)
+  }
+
   return (
     <form className="juego" onSubmit={comprobar}>
       <h1>Wordle</h1>
@@ -78,11 +83,16 @@ function App() {
         ))}
       </div>
       {terminada ? (
-        <p className="mensaje" role="status">
-          {ganada
-            ? '¡Enhorabuena, has acertado!'
-            : `La palabra era ${SOLUCION}`}
-        </p>
+        <>
+          <p className="mensaje" role="status">
+            {ganada
+              ? '¡Enhorabuena, has acertado!'
+              : `La palabra era ${SOLUCION}`}
+          </p>
+          <button className="boton" type="button" onClick={nuevaPartida}>
+            Nueva partida
+          </button>
+        </>
       ) : (
         <button className="boton" type="submit">
           Comprobar
