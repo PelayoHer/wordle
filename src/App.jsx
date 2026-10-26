@@ -25,6 +25,7 @@ function App() {
   const [intentos, setIntentos] = useState(tableroVacio())
   const [filaActual, setFilaActual] = useState(0)
   const [solucion, setSolucion] = useState(obtenerPalabraAleatoria)
+  const [aviso, setAviso] = useState('')
 
   // El último intento comprobado, como texto: 'PERRO'
   const ultimo = filaActual > 0 ? intentos[filaActual - 1].join('') : ''
@@ -41,6 +42,8 @@ function App() {
     // Solo aceptamos una letra, o nada si se ha borrado
     if (!/^[A-ZÑ]?$/.test(letra)) return
 
+    if (aviso) setAviso('')
+
     // Copiamos el tablero, cambiamos la copia y la guardamos
     const copia = intentos.map((fila) => [...fila])
     copia[f][c] = letra
@@ -55,8 +58,12 @@ function App() {
     evento.preventDefault()
     if (terminada) return
     // No se puede comprobar una fila incompleta
-    if (intentos[filaActual].includes('')) return
+    if (intentos[filaActual].includes('')) {
+      setAviso('Faltan letras')
+      return
+    }
 
+    setAviso('')
     setFilaActual(filaActual + 1)
   }
 
@@ -64,6 +71,7 @@ function App() {
     setIntentos(tableroVacio())
     setFilaActual(0)
     setSolucion(obtenerPalabraAleatoria())
+    setAviso('')
   }
 
   return (
@@ -84,6 +92,11 @@ function App() {
           </div>
         ))}
       </div>
+      {aviso && (
+        <p className="aviso" role="alert">
+          {aviso}
+        </p>
+      )}
       {terminada ? (
         <>
           <p className="mensaje" role="status">
