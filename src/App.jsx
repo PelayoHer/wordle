@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react'
 import Casilla from './components/Casilla.jsx'
+import { obtenerPalabraAleatoria } from './palabras.js'
 
 const FILAS = 6
 const COLUMNAS = 5
-const SOLUCION = 'PERRO'
 
 // Crea un tablero vacío: 6 filas de 5 letras en blanco
 function tableroVacio() {
@@ -15,19 +15,20 @@ function tableroVacio() {
 }
 
 // Decide el color de una letra ya comprobada
-function estadoDe(letra, columna) {
-  if (SOLUCION[columna] === letra) return 'correcta'
-  if (SOLUCION.includes(letra)) return 'presente'
+function estadoDe(letra, columna, solucion) {
+  if (solucion[columna] === letra) return 'correcta'
+  if (solucion.includes(letra)) return 'presente'
   return 'ausente'
 }
 
 function App() {
   const [intentos, setIntentos] = useState(tableroVacio())
   const [filaActual, setFilaActual] = useState(0)
+  const [solucion, setSolucion] = useState(obtenerPalabraAleatoria)
 
   // El último intento comprobado, como texto: 'PERRO'
   const ultimo = filaActual > 0 ? intentos[filaActual - 1].join('') : ''
-  const ganada = ultimo === SOLUCION
+  const ganada = ultimo === solucion
   const terminada = ganada || filaActual === FILAS
 
   useEffect(() => {
@@ -62,6 +63,7 @@ function App() {
   function nuevaPartida() {
     setIntentos(tableroVacio())
     setFilaActual(0)
+    setSolucion(obtenerPalabraAleatoria())
   }
 
   return (
@@ -74,7 +76,7 @@ function App() {
               <Casilla
                 key={c}
                 letra={letra}
-                estado={f < filaActual ? estadoDe(letra, c) : ''}
+                estado={f < filaActual ? estadoDe(letra, c, solucion) : ''}
                 activa={f === filaActual && !terminada}
                 onCambio={(evento) => cambiarLetra(f, c, evento)}
               />
@@ -87,7 +89,7 @@ function App() {
           <p className="mensaje" role="status">
             {ganada
               ? '¡Enhorabuena, has acertado!'
-              : `La palabra era ${SOLUCION}`}
+              : `La palabra era ${solucion}`}
           </p>
           <button className="boton" type="button" onClick={nuevaPartida}>
             Nueva partida
