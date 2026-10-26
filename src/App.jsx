@@ -124,6 +124,8 @@ function App() {
             {fila.map((letra, c) => (
               <Casilla
                 key={c}
+                fila={f + 1}
+                columna={c + 1}
                 letra={letra}
                 estado={f < filaActual ? estadoDe(letra, c, solucion, fila) : ''}
                 activa={f === filaActual && !terminada}
