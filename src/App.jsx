@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import Casilla from './components/Casilla.jsx'
+import Teclado from './components/Teclado.jsx'
 import { obtenerPalabraAleatoria } from './palabras.js'
 
 const FILAS = 6
@@ -46,6 +47,29 @@ function calcularEstadosFila(fila, solucion) {
   return estados
 }
 
+// Calcula el mejor estado de cada letra para el teclado en pantalla
+function calcularEstadosLetras(intentos, filaActual, solucion) {
+  const estados = {}
+  for (let f = 0; f < filaActual; f++) {
+    const fila = intentos[f]
+    const estadosFila = calcularEstadosFila(fila, solucion)
+    for (let c = 0; c < COLUMNAS; c++) {
+      const letra = fila[c]
+      const actual = estados[letra]
+      const nuevo = estadosFila[c]
+
+      if (nuevo === 'correcta') {
+        estados[letra] = 'correcta'
+      } else if (nuevo === 'presente' && actual !== 'correcta') {
+        estados[letra] = 'presente'
+      } else if (!actual) {
+        estados[letra] = nuevo
+      }
+    }
+  }
+  return estados
+}
+
 // Decide el color de una letra individual (útil para pruebas unitarias)
 function estadoDe(letra, columna, solucion, fila = null) {
   if (fila) {
@@ -66,6 +90,7 @@ function App() {
   const ultimo = filaActual > 0 ? intentos[filaActual - 1].join('') : ''
   const ganada = ultimo === solucion
   const terminada = ganada || filaActual === FILAS
+  const estadosLetras = calcularEstadosLetras(intentos, filaActual, solucion)
 
   useEffect(() => {
     // Lleva el cursor a la primera casilla en la que se puede escribir
@@ -106,6 +131,45 @@ function App() {
 
     setAviso('')
     setFilaActual(filaActual + 1)
+  }
+
+  function pulsarTeclaVirtual(tecla) {
+    if (terminada) return
+
+    if (tecla === 'ENVIAR') {
+      if (intentos[filaActual].includes('')) {
+        setAviso('Faltan letras')
+        return
+      }
+      setAviso('')
+      setFilaActual(filaActual + 1)
+      return
+    }
+
+    if (tecla === 'BORRAR') {
+      if (aviso) setAviso('')
+      let ultimoLleno = -1
+      for (let c = COLUMNAS - 1; c >= 0; c--) {
+        if (intentos[filaActual][c] !== '') {
+          ultimoLleno = c
+          break
+        }
+      }
+      if (ultimoLleno !== -1) {
+        const copia = intentos.map((fila) => [...fila])
+        copia[filaActual][ultimoLleno] = ''
+        setIntentos(copia)
+      }
+      return
+    }
+
+    if (aviso) setAviso('')
+    const primerVacio = intentos[filaActual].findIndex((letra) => letra === '')
+    if (primerVacio !== -1) {
+      const copia = intentos.map((fila) => [...fila])
+      copia[filaActual][primerVacio] = tecla
+      setIntentos(copia)
+    }
   }
 
   function nuevaPartida() {
@@ -157,6 +221,7 @@ function App() {
           Comprobar
         </button>
       )}
+      <Teclado estadosLetras={estadosLetras} onPulsar={pulsarTeclaVirtual} />
     </form>
   )
 }
